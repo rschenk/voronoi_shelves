@@ -1,52 +1,20 @@
-import paper from 'paper'
+import { stylesLight, _stylesDark } from './paper_styles.js'
 
-const stylesLight = {
-  outline: {
-    strokeColor: '#000',
-    fillColor: null,
-    strokeWidth: 1
-  },
+const styles = stylesLight
+let paper
 
-  debug: {
-    strokeColor: '#bbb',
-    fillColor: null,
-    strokeWidth: 0.5
-  },
-
-  red: {
-    fillColor: 'red',
-    strokeWidth: 0
-  }
+export function setPaper (ppr) {
+  paper = ppr
 }
 
-const stylesDark = {
-  outline: {
-    ...stylesLight.outline,
-    strokeColor: '#ddd'
-  },
-
-  debug: {
-    ...stylesLight.debug,
-    strokeColor: '#555'
-  },
-
-  red: {
-    ...stylesLight.red
-  }
-}
-
-const styles = stylesDark
-
-export function setUpPaper (canvas) {
-  paper.setup(canvas)
-  paper.project.currentStyle = styles.outline
-}
-
-export function drawConnector (rootCoords, angles) {
-  const materialThickness = 15
-  const armLength = 150
-  const armThickness = materialThickness * 4
-  const coreRadius = materialThickness * 3
+export function draw (rootCoords, angles, {
+  materialThickness = 15,
+  armLength = 150,
+  coreRadius = null,
+  armThickness = null
+}) {
+  coreRadius = coreRadius || materialThickness * 3
+  armThickness = armThickness || materialThickness * 4
   const cornerRadius = (armThickness - materialThickness) / 2
 
   const sortedAngles = angles.sort((a, b) => a - b)
@@ -54,7 +22,7 @@ export function drawConnector (rootCoords, angles) {
   const arms = sortedAngles
     .map(angle => drawArm(rootCoords, angle, armLength, armThickness))
 
-  const armSpecs = arms.map((arm, i) => {
+  const armSpecs = arms.map(arm => {
     const ccwPoint = arm.segments[1].point
     const cwPoint = arm.segments[2].point
 
@@ -114,9 +82,6 @@ export function drawConnector (rootCoords, angles) {
 
   originalCorners.forEach(seg => seg.remove())
 
-
-  // arms.forEach(a => a.remove())
-
   const cutouts = sortedAngles
     .map(angle => drawCutout(rootCoords, angle, armLength, materialThickness, coreRadius))
 
@@ -127,7 +92,9 @@ export function drawConnector (rootCoords, angles) {
   )
 
   clippedMetaArm.fullySelected = false
-  paper.project.activeLayer.addChild(clippedMetaArm)
+  const _finalPath = paper.project.activeLayer.addChild(clippedMetaArm);
+
+  [...arms, ...cutouts].forEach(path => { path.remove() })
 }
 
 function drawArm (rootCoords, angle, armLength, armThickness) {
