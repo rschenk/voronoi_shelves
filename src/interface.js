@@ -3,11 +3,10 @@ import strftime from 'strftime'
 import paperStyles from './paper_styles.js'
 import './style.css'
 
-const styles = paperStyles.stylesLight
-
 function setUp (canvasW, canvasH, { initializePaper = true, darkMode = false }) {
   if (darkMode) { document.querySelector('body').classList.add('dark') }
-  
+  paperStyles.setDarkMode(darkMode)
+
   const appWrapper = document.createElement('div')
   appWrapper.classList.add('app-wrapper')
   document.body.appendChild(appWrapper)
@@ -48,7 +47,7 @@ function setUpRetina (canvas, context) {
 
 function setUpPaper (canvas) {
   paper.setup(canvas)
-  paper.project.currentStyle = styles.outline
+  paper.project.currentStyle = paperStyles.getStyles().outline
 }
 
 function canvasElement (id) {

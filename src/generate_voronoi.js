@@ -17,8 +17,8 @@ export default function generateVoronoi (context, w, h, {
   numRelaxIterations = 1,
   minCellRadius = 40
 }) {
-  voronoiBounds = { xl: 0, yt: 0, xr: w - 0, yb: h - 0 }
-  points = generatePoints(numPoints, w, h)
+  voronoiBounds = { xl: 20, yt: 20, xr: w - 20, yb: h - 20 }
+  points = generatePoints(numPoints, voronoiBounds)
   diagram = voronoi.compute(points, voronoiBounds)
 
   do {
@@ -38,7 +38,7 @@ export default function generateVoronoi (context, w, h, {
     }
   } while (smallestCenter.distance < minCellRadius)
 
-  render(context, diagram, w, h, minCellRadius)
+  // render(context, diagram, w, h, minCellRadius)
   return diagram
 }
 
@@ -75,11 +75,11 @@ function findSmallestCenter (centers) {
   )
 }
 
-function generatePoints (num, w, h) {
+function generatePoints (num, { xl, yt, xr, yb }) {
   return new Array(num).fill(null).map(_ => {
     return {
-      x: Math.floor(Math.random() * Math.floor(w)),
-      y: Math.floor(Math.random() * Math.floor(h))
+      x: xl + Math.floor(Math.random() * Math.floor(xr - xl)),
+      y: yt + Math.floor(Math.random() * Math.floor(yb - yt))
     }
   })
 }

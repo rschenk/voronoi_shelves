@@ -1,13 +1,13 @@
-import { stylesLight, _stylesDark } from './paper_styles.js'
+import { getStyles } from './paper_styles.js'
 
-const styles = stylesLight
+let styles
 let paper
 
 export function setPaper (ppr) {
   paper = ppr
 }
 
-export function draw (rootCoords, angles, {
+export function draw (rootCoords, angles, label, {
   materialThickness = 15,
   armLength = 150,
   coreRadius = null,
@@ -17,6 +17,9 @@ export function draw (rootCoords, angles, {
   armThickness = armThickness || materialThickness * 4
   const cornerRadius = (armThickness - materialThickness) / 2
 
+  styles = getStyles()
+
+  let labelText = null
   const sortedAngles = angles.sort((a, b) => a - b)
 
   const arms = sortedAngles
@@ -95,6 +98,26 @@ export function draw (rootCoords, angles, {
   const _finalPath = paper.project.activeLayer.addChild(clippedMetaArm);
 
   [...arms, ...cutouts].forEach(path => { path.remove() })
+
+  // Add label
+  if (label && label.toString() !== '') {
+    const g = new paper.Group({ name: `c-${label}` })
+
+    labelText = new paper.PointText({
+      parent: g,
+      point: new paper.Point(rootCoords).add(0, 4),
+      content: label.toString(),
+      style: {
+        ...styles.displayText,
+        justification: 'center'
+      }
+    })
+
+    g.addChild(clippedMetaArm)
+    return g
+  } else {
+    return clippedMetaArm
+  }
 }
 
 function drawArm (rootCoords, angle, armLength, armThickness) {
