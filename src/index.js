@@ -7,7 +7,7 @@ import { inch } from './units.js'
  * TODO
  * - [x] Separately parameterize shelf & connector thickness
  * - [ ] Add in real units
- * - [ ] Automagically scale design to fit in window
+ * - [x] Automagically scale design to fit in window
  * - [ ] Outline the single-stroke font
  */
 

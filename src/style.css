@@ -18,3 +18,16 @@ canvas {
   box-shadow: 3px 3px 20px 0px rgba(0, 0, 0, 0.15);
 }
 
+.chrome {
+  background: #e7e7e7;
+  color: #777;
+  font-size: 11px;
+  font-family: droid_sansregular, sans-serif;
+}
+
+#zoom-chrome {
+  position: absolute;
+  bottom: 0;
+  padding: 0.25em 0.5em;
+  border-radius: 2px 2px 0 0;
+}

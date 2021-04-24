@@ -37,7 +37,7 @@ export function drawSideView (edge, {
   })
   rect.bounds.leftCenter = start.point.add(coreV)
   rect.rotate(angle, rect.bounds.leftCenter)
-  
+
   const g = new paper.Group({ name: `e-${start.label}-${end.label}` })
   g.addChild(notchRect)
   g.addChild(rect)
