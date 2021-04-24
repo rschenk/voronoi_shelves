@@ -9,6 +9,7 @@ import { inch } from './units.js'
  * - [ ] Add in real units
  * - [x] Automagically scale design to fit in window
  * - [ ] Outline the single-stroke font
+ * - [x] Schematic view
  */
 
 const w = 400

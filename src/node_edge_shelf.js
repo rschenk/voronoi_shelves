@@ -84,10 +84,12 @@ function crank (voronoiDiagram, connectorParams, shelfParams) {
   vertices.forEach((v, i) => { v.label = (i + 1).toString() })
 
   const previewGroup = renderPreview(vertices, vertIndex, edges, edgeIndex, connectorParams)
+  const schematicGroup = renderSchematic(vertices, vertIndex, edges, edgeIndex, connectorParams)
   const connectorGroup = renderConnectorsForLaser(vertices, vertIndex, edges, edgeIndex, connectorParams)
   const connectorGroup2 = connectorGroup.clone() // Need two sets of connectors
   const edgeGroup = renderEdgesForLaser(edges, shelfParams)
 
+  schematicGroup.bounds.topLeft = previewGroup.bounds.bottomLeft.add(0, 10)
   connectorGroup.bounds.topLeft = [previewGroup.bounds.topRight.x + 10, 10]
   connectorGroup2.bounds.topLeft = [connectorGroup.bounds.topRight.x + 10, 10]
   edgeGroup.bounds.topLeft = [connectorGroup2.bounds.topRight.x + 10, 10]
@@ -169,6 +171,39 @@ function renderPreview (vertices, vertIndex, edges, edgeIndex, connectorParams) 
       selectedVertex.point,
       selectedAngles,
       null, // v.label,
+      { ...connectorParams, laser: false }
+    )
+    group.addChild(connector)
+  })
+
+  return group
+}
+
+function renderSchematic (vertices, vertIndex, edges, edgeIndex, connectorParams) {
+  const group = new paper.Group({ name: 'schematic' })
+  // Draw edges
+  edges.forEach(edge => {
+    const { start, end } = edge
+    const v = end.point.subtract(start.point).normalize(connectorParams.coreRadius)
+
+    const _ = new paper.Path({
+      segments: [start.point.add(v), end.point.subtract(v)],
+      style: styles.debug,
+      parent: group
+    })
+  })
+
+  vertices.forEach(v => {
+    if (!edgeIndex.has(v.id)) { return }
+
+    const selectedVertex = vertIndex.get(v.id)
+    const selectedEdges = Array.from(edgeIndex.get(v.id))
+    const selectedAngles = calculateEdgeAngles(selectedVertex, selectedEdges)
+
+    const connector = Connector.draw(
+      selectedVertex.point,
+      selectedAngles,
+      v.label,
       { ...connectorParams, laser: false }
     )
     group.addChild(connector)

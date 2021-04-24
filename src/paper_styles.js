@@ -31,7 +31,7 @@ export const stylesLight = {
     fillColor: '#000',
     strokeWidth: 0,
     fontFamily: 'Avenir Next, Avenir, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, Helvetica, Ubuntu, Roboto, Noto, Arial, sans-serif',
-    fontSize: 9
+    fontSize: 14
   },
 
   etchText: {
