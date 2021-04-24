@@ -1,5 +1,6 @@
 import { getStyles } from './paper_styles.js'
 import * as Connector from './connector.js'
+import * as Shelf from './shelf.js'
 
 const styles = getStyles()
 let paper
@@ -7,9 +8,10 @@ let paper
 function setPaper (ppr) {
   paper = ppr
   Connector.setPaper(paper)
+  Shelf.setPaper(paper)
 }
 
-function crank (voronoiDiagram, connectorParams) {
+function crank (voronoiDiagram, connectorParams, shelfParams) {
   // Set an ID for vertices
   voronoiDiagram.vertices.forEach((v, i) => { v.vertexId = i })
 
@@ -18,7 +20,8 @@ function crank (voronoiDiagram, connectorParams) {
   let vertices = voronoiDiagram.vertices.map(({ x, y, vertexId }) => {
     return ({
       point: new paper.Point(x, y),
-      id: vertexId
+      id: vertexId,
+      label: null
     })
   })
 
@@ -76,14 +79,41 @@ function crank (voronoiDiagram, connectorParams) {
     )
   })
 
-  // renderConnectors(vertices, vertIndex, edges, edgeIndex, connectorParams)
+  // After all edge collapsing etc is done, enumerate labels onto the vertices,
+  // so the labels are all continuous and in a nice order
+  vertices.forEach((v, i) => { v.label = (i + 1).toString() })
 
-  renderPreview(vertices, vertIndex, edges, edgeIndex, connectorParams)
+  const previewGroup = renderPreview(vertices, vertIndex, edges, edgeIndex, connectorParams)
+  const connectorGroup = renderConnectorsForLaser(vertices, vertIndex, edges, edgeIndex, connectorParams)
+  const connectorGroup2 = connectorGroup.clone() // Need two sets of connectors
+  const edgeGroup = renderEdgesForLaser(edges, shelfParams)
+
+  connectorGroup.bounds.topLeft = [previewGroup.bounds.topRight.x + 10, 10]
+  connectorGroup2.bounds.topLeft = [connectorGroup.bounds.topRight.x + 10, 10]
+  edgeGroup.bounds.topLeft = [connectorGroup2.bounds.topRight.x + 10, 10]
 }
 
-function renderConnectors (vertices, vertIndex, _edges, edgeIndex, connectorParams) {
+function renderEdgesForLaser (edges, edgeParams) {
   const padding = 10
-  let accumulator = padding
+  let accumulator = 0
+
+  const group = new paper.Group({ name: 'edges' })
+
+  edges.forEach(e => {
+    const shelf = Shelf.draw(e, { ...edgeParams, laser: true })
+    shelf.bounds.topLeft = [padding, accumulator]
+    group.addChild(shelf)
+    accumulator += shelf.bounds.height + padding
+  })
+
+  return group
+}
+
+function renderConnectorsForLaser (vertices, vertIndex, _edges, edgeIndex, connectorParams) {
+  const padding = 10
+  let accumulator = 0
+
+  const group = new paper.Group({ name: 'connectors' })
 
   vertices.forEach(v => {
     if (!edgeIndex.has(v.id)) { return }
@@ -95,23 +125,37 @@ function renderConnectors (vertices, vertIndex, _edges, edgeIndex, connectorPara
     const connector = Connector.draw(
       [0, 0],
       selectedAngles,
-      v.id.toString(),
-      connectorParams
+      v.label,
+      { ...connectorParams, laser: true }
     )
 
     connector.bounds.topLeft = [connectorParams.armLength, accumulator]
 
+    group.addChild(connector)
+
     accumulator += connector.bounds.height + padding
   })
+
+  return group
 }
 
 function renderPreview (vertices, vertIndex, edges, edgeIndex, connectorParams) {
-// Draw edges
-  edges.forEach(({ start, end }) => {
-    const _ = new paper.Path({
-      segments: [start, end],
-      style: styles.debug
+  const group = new paper.Group({ name: 'preview' })
+  // Draw edges
+  edges.forEach(edge => {
+    // const { start, end } = edge
+    // const _ = new paper.Path({
+    //   segments: [start, end],
+    //   style: styles.debug
+    // })
+
+    const shelf = Shelf.drawSideView(edge, {
+      materialThickness: connectorParams.materialThickness,
+      notchLength: connectorParams.materialThickness,
+      connectorCoreRadius: connectorParams.coreRadius,
+      laser: false
     })
+    group.addChild(shelf)
   })
 
   vertices.forEach(v => {
@@ -121,19 +165,16 @@ function renderPreview (vertices, vertIndex, edges, edgeIndex, connectorParams) 
     const selectedEdges = Array.from(edgeIndex.get(v.id))
     const selectedAngles = calculateEdgeAngles(selectedVertex, selectedEdges)
 
-    // const _ = new paper.Path.Circle({
-    //   center: selectedVertex.point,
-    //   radius: 2,
-    //   style: styles.red
-    // })
-
-    Connector.draw(
+    const connector = Connector.draw(
       selectedVertex.point,
       selectedAngles,
-      v.id.toString(),
-      connectorParams
+      null, // v.label,
+      { ...connectorParams, laser: false }
     )
+    group.addChild(connector)
   })
+
+  return group
 }
 
 // returns Map vertexId => [Edge, Edge]

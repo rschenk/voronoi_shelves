@@ -1,4 +1,4 @@
-import { getStyles } from './paper_styles.js'
+import { getStyles, stylesLaser } from './paper_styles.js'
 
 let styles
 let paper
@@ -11,7 +11,8 @@ export function draw (rootCoords, angles, label, {
   materialThickness = 15,
   armLength = 150,
   coreRadius = null,
-  armThickness = null
+  armThickness = null,
+  laser = false
 }) {
   coreRadius = coreRadius || materialThickness * 3
   armThickness = armThickness || materialThickness * 4
@@ -35,7 +36,11 @@ export function draw (rootCoords, angles, label, {
     return { ccwPoint, ccwEdge, cwPoint, cwEdge }
   })
 
-  const metaArms = new paper.Path({ insert: false, closed: true })
+  const metaArms = new paper.Path({
+    insert: false,
+    closed: true,
+    style: styles.outline
+  })
   armSpecs.forEach((armSpec, i) => {
     const handleScaleFactor = 0.8
     const { ccwPoint, ccwEdge, cwPoint, cwEdge } = armSpec
@@ -95,25 +100,27 @@ export function draw (rootCoords, angles, label, {
   )
 
   clippedMetaArm.fullySelected = false
+  clippedMetaArm.style = laser ? stylesLaser.outline2 : styles.outline
   const _finalPath = paper.project.activeLayer.addChild(clippedMetaArm);
 
   [...arms, ...cutouts].forEach(path => { path.remove() })
 
   // Add label
   if (label && label.toString() !== '') {
-    const g = new paper.Group({ name: `c-${label}` })
+    const baseStyles = laser ? styles.etchText : styles.displayText
 
     labelText = new paper.PointText({
-      parent: g,
       point: new paper.Point(rootCoords).add(0, 4),
       content: label.toString(),
       style: {
-        ...styles.displayText,
+        ...baseStyles,
         justification: 'center'
       }
     })
 
+    const g = new paper.Group({ name: `c-${label}` })
     g.addChild(clippedMetaArm)
+    g.addChild(labelText)
     return g
   } else {
     return clippedMetaArm

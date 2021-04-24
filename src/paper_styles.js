@@ -30,7 +30,15 @@ export const stylesLight = {
   displayText: {
     fillColor: '#000',
     strokeWidth: 0,
-    fontFamily: 'Avenir Next',
+    fontFamily: 'Avenir Next, Avenir, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica Neue, Helvetica, Ubuntu, Roboto, Noto, Arial, sans-serif',
+    fontSize: 9
+  },
+
+  etchText: {
+    fillColor: null,
+    strokeWidth: 1,
+    strokeColor: '#000',
+    fontFamily: 'OLF ModA',
     fontSize: 9
   }
 }
@@ -53,7 +61,34 @@ export const stylesDark = {
   displayText: {
     ...stylesLight.displayText,
     fillColor: '#ddd'
+  },
+
+  etchText: {
+    ...stylesLight.etchText,
+    strokeColor: '#ddd'
   }
 }
 
-export default { stylesLight, stylesDark, getStyles, setDarkMode }
+export const stylesLaser = {
+  outline1: {
+    ...stylesLight.outline,
+    strokeColor: '#000000'
+  },
+
+  outline2: {
+    ...stylesLight.outline,
+    strokeColor: '#0072B2'
+  },
+
+  outline3: {
+    ...stylesLight.outline,
+    strokeColor: '#009E73'
+  },
+
+  outline4: {
+    ...stylesLight.outline,
+    strokeColor: '#56B4E9'
+  }
+}
+
+export default { stylesLight, stylesDark, stylesLaser, getStyles, setDarkMode }
