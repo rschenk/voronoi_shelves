@@ -84,6 +84,11 @@ function cmdS (event, command) {
 function saveAsSVG () {
   if (!paper) { return }
 
+  const view = paper.view
+  const zoomChrome = document.getElementById('zoom-chrome')
+
+  resizeViewTo(originalViewSize.width, originalViewSize.height, view, zoomChrome)
+
   const fileNameBase = 'voronoi_shelf'
 
   const time = strftime('%F-%H-%M')
@@ -96,6 +101,8 @@ function saveAsSVG () {
   link.href = url
   link.click()
   link.remove()
+
+  onResize(view, zoomChrome)
 }
 
 function setUpResize (view, zoomChrome) {

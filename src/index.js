@@ -1,29 +1,31 @@
 import initializeInterface from './interface.js'
 import generateVoronoi from './generate_voronoi.js'
 import nodeEdgeShelf from './node_edge_shelf.js'
-import { inch } from './units.js'
+import { inch, mm } from './units.js'
 
 /*
  * TODO
  * - [x] Separately parameterize shelf & connector thickness
- * - [ ] Add in real units
+ * - [x] Add in real units
  * - [x] Automagically scale design to fit in window
  * - [ ] Outline the single-stroke font
  * - [x] Schematic view
  */
 
-const w = 400
-const h = 600
+const w = inch(15)
+const h = inch(15)
 
 const _cardboardThickness = inch(0.15)
+const balticBrichThickness = mm(2.9)
+const mediumDraftBoardThickness = mm(3.13)
 
-const shelfMaterialThickness = 8
-const connectorMaterialThickness = shelfMaterialThickness
+const shelfMaterialThickness = mediumDraftBoardThickness
+const connectorMaterialThickness = balticBrichThickness
 
 const voronoiParams = {
-  numPoints: 6,
+  numPoints: 20,
   numRelaxIterations: 1,
-  minCellRadius: 80
+  minCellRadius: inch(1.55)
 }
 
 const connectorParams = {
@@ -34,7 +36,7 @@ const connectorParams = {
 }
 
 const shelfParams = {
-  depth: 80,
+  depth: inch(2),
   materialThickness: connectorMaterialThickness,
   notchLength: connectorMaterialThickness,
   connectorCoreRadius: connectorParams.coreRadius
